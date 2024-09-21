@@ -1,0 +1,47 @@
+name: CI Pipeline
+
+# Executa o workflow em qualquer push para as branches main e develop
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  build:
+    # Roda o job em um ambiente Ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+      # Fazer o checkout do código do repositório
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Configurar o JDK (Java Development Kit) 21
+      - name: Set up JDK 21
+        uses: actions/setup-java@v2
+        with:
+          java-version: '21'
+          distribution: ''
+
+      # Cache de dependências Maven para acelerar o processo de build no diretório Q02
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('Q02/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      # Compilar o projeto e rodar testes apenas no diretório Q02
+      - name: Build and test Q02
+        working-directory: ./Q02
+        run: mvn clean verify
+
+      # Armazenar os relatórios de teste como artefatos para inspeção futura
+      - name: Upload test results
+        if: success()
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results
+          path: Q02/target/surefire-reports
