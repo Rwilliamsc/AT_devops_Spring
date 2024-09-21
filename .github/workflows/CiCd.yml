@@ -8,7 +8,7 @@ on:
       - develop
 
 jobs:
-  build:
+  test_Q02:
     # Roda o job em um ambiente Ubuntu
     runs-on: ubuntu-latest
 
